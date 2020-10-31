@@ -1,0 +1,60 @@
+name: Production deliver
+on:
+  release:
+    types: [prereleased]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      ANSIBLE_HOST_KEY_CHECKING: "False"
+      DO_API_KEY: ${{ secrets.DO_API_KEY }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: "${{ secrets.PAT2 }}"
+          submodules: recursive
+
+      - name: Write ssh key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PUB }}" > ~/.ssh/id_rsa.pub
+          chmod 600 ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa.pub
+
+      - name: Install Taskfile.dev deb
+        run: |
+          wget https://github.com/go-task/task/releases/download/v3.0.0/task_linux_amd64.deb
+          sudo dpkg -i ./task_linux_amd64.deb
+
+#       - name: Build ticker
+#         run: task build
+#         working-directory: ./data/ticker-backend-go/
+
+#       - name: Build dvarghare
+#         run: task build
+#         working-directory: ./data/dvarghare-backend-go/
+
+      - name: Buildnig invntory
+        run: python3 build_inventory.py
+
+      - name: Ansible machines upload
+        run: ansible-playbook playbooks/machines/upload.yaml
+
+      - name: Ansible machines codetee
+        run: ansible-playbook playbooks/machines/codetee.yaml
+
+#       - name: Ansible machines ticker
+#         run: ansible-playbook playbooks/machines/ticker.yaml
+
+#       - name: Ansible machines dvarghare
+#         run: ansible-playbook playbooks/machines/dvarghare.yaml
+
+      - name: Ansible machines caddy
+        run: ansible-playbook playbooks/machines/caddy.yaml
+
+      - name: Install datadog role ansible from galaxy
+        run: pip install pyyaml datadog packaging && ansible-galaxy install datadog.datadog
+
+      - name: Ansible datadog
+        run: ansible-playbook playbooks/datadog.yaml

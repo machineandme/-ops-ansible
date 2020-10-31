@@ -1,0 +1,14 @@
+all:
+  children:
+    gateway:
+      hosts:
+        api-gateway:
+          ansible_host: 46.101.117.195
+    ticker:
+      hosts:
+        ticker-1:
+          ansible_host: 167.99.249.87
+    www:
+      hosts:
+        www-1:
+          ansible_host: 167.99.251.17
