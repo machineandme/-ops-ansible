@@ -54,6 +54,46 @@ Will execute only on test server of sampleProject.
 
 Will execute only on production server of sampleProject.
 
+
+## Github action
+
+Add to repository secrets:
+1. `githubPAT` - github personal access token
+2. `sshKey` - allowed ssh key for target machine
+3. `sshPubKey` - public key for `sshKey`
+
+```yaml
+name: Release
+on:
+  release:
+    types: [released]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: "${{ secrets.githubPAT }}"
+          submodules: recursive
+
+      - name: Write ssh key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.sshKey }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.sshPubKey }}" > ~/.ssh/id_rsa.pub
+          chmod 600 ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa.pub
+
+      - name: Install Taskfile.dev deb
+        run: |
+          wget https://github.com/go-task/task/releases/download/v3.0.0/task_linux_amd64.deb
+          sudo dpkg -i ./task_linux_amd64.deb
+
+      # - name: Ansible some playbook
+      #   run: ansible-playbook ../playbooks/example.yaml
+      #   working-directory: -ops-ansible
+```
+
 ## Refresh inventory
 
 Get the digital ocean api key and run with `{{it}}` in env build_inventory python file.
