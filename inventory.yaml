@@ -1,5 +1,9 @@
 all:
   children:
+    codetee:
+      hosts:
+        codetee-1:
+          ansible_host: 206.189.53.178
     gateway:
       hosts:
         api-gateway:
