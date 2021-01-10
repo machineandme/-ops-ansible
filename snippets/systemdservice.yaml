@@ -1,0 +1,27 @@
+- name: Create X service in systemd
+  copy:
+    dest: /etc/systemd/system/{{systemdservice_name}}.service
+    content: |
+      [Unit]
+      Description={{systemdservice_name}}
+      After=network.target network-online.target
+      Requires=network-online.target
+      [Service]
+      Type=simple
+      ExecStart={{systemdservice_execute}}
+      {{systemdservice_additional}}
+      Restart=on-failure
+      RestartSec=10
+      [Install]
+      WantedBy=multi-user.target
+- name: Check is OS has systemd
+  stat:
+    path: /lib/systemd/systemd
+  register: systemdservice_executable
+- name: Enable and restart X service
+  systemd:
+    daemon_reload: yes
+    enabled: yes
+    state: restarted
+    name: "{{systemdservice_name}}"
+  when: systemdservice_executable.stat.exists
