@@ -4,14 +4,14 @@ all:
       hosts:
         codetee-1:
           ansible_host: 138.68.71.200
+    directtome:
+      hosts:
+        directtome-1:
+          ansible_host: 46.101.54.197
     gateway:
       hosts:
         api-gateway:
           ansible_host: 46.101.117.195
-    ticker:
-      hosts:
-        ticker-1:
-          ansible_host: 167.99.249.87
     www:
       hosts:
         www-1:
